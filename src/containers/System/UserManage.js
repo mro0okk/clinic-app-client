@@ -1,7 +1,11 @@
 import React, { Component } from "react"
 import { FormattedMessage } from "react-intl"
 import "./UserManage.scss"
-import { getAllUsers } from "../../services/userService"
+import {
+  getAllUsers,
+  createNewUser as createUser,
+  deleteUser,
+} from "../../services/userService"
 import { connect } from "react-redux"
 import ModalUser from "./ModalUser"
 class UserManage extends Component {
@@ -14,6 +18,9 @@ class UserManage extends Component {
   }
 
   async componentDidMount() {
+    await this.getUsers()
+  }
+  getUsers = async () => {
     let res = await getAllUsers("ALL")
     if (res && res.errCode === 0) {
       this.setState({
@@ -24,7 +31,38 @@ class UserManage extends Component {
   handleAddNewUser = () => {
     this.setState({ isOpenModal: !this.state.isOpenModal })
   }
+  createNewUser = async (newUserData) => {
+    try {
+      let res = await createUser(newUserData)
+      if (res && res.errCode === 0) {
+        await this.getUsers()
+      } else {
+        this.setState({
+          isOpenModal: true,
+        })
+        alert(res?.message || res?.errMessage)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
+  handleDeleteUser = async (id, firstName, lastName) => {
+    let data = {
+      id,
+      firstName,
+      lastName,
+    }
+    try {
+      let res = await deleteUser(data)
+      if (res && res?.errCode === 0) {
+        await this.getUsers()
+      }
+      alert(res?.message || res?.errMessage)
+    } catch (e) {
+      console.error(e)
+    }
+  }
   render() {
     console.log("check render", this.state)
     let arrUsers = this.state.users
@@ -33,8 +71,9 @@ class UserManage extends Component {
         <ModalUser
           isOpen={this.state.isOpenModal}
           toggle={this.handleAddNewUser}
+          createNewUser={this.createNewUser}
         />
-        <div className="title text-center"> manage with daniel nguyen</div>
+        <div className="title text-center"> User List </div>
         <div className="mx-1">
           <button
             className="btn btn-success px-2"
@@ -70,7 +109,16 @@ class UserManage extends Component {
                       <button className="btn btn__Usermanage text-yellow">
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button className="btn btn__Usermanage text-red">
+                      <button
+                        className="btn btn__Usermanage text-red"
+                        onClick={() =>
+                          this.handleDeleteUser(
+                            user.id,
+                            user.firstName,
+                            user.lastName
+                          )
+                        }
+                      >
                         <i className="fas fa-trash-alt"></i>
                       </button>
                     </td>

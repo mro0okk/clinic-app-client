@@ -7,15 +7,52 @@ class ModalUser extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      toggle: true,
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      address: "",
     }
   }
-  componentDidMount() {}
+  componentDidMount() {
+    console.log("mount")
+  }
   toggle = () => {
     this.props.toggle()
   }
+
+  handleOnchangeInput = (e, type) => {
+    let newState = this.state
+    const transform = (type) => {
+      newState[type] = e.target.value
+    }
+    transform(type)
+    return this.setState(newState)
+  }
+
+  validateInput = () => {
+    let isValid = true
+    const arrInput = ["email", "password", "firstName", "lastName", "address"]
+    for (let i = 0; i < arrInput.length; i++) {
+      if (!this.state[arrInput[i]]) {
+        isValid = false
+        alert(`missing parameter! :  ${arrInput[i]}`)
+        break
+      }
+    }
+    return isValid
+  }
+  handleAddUser = () => {
+    let invalid = this.validateInput()
+    if (invalid) {
+      this.props.createNewUser(this.state)
+      console.log(this.state)
+      this.toggle()
+    }
+    return
+  }
   render() {
-    console.log(`check child props :${this.props.toggle}`)
+    console.log(this.state)
     return (
       <Modal
         isOpen={this.props.isOpen}
@@ -24,46 +61,84 @@ class ModalUser extends Component {
         size="lg"
         centered
       >
-        <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+        <ModalHeader
+          toggle={this.toggle}
+          className="modal__user--title"
+          color="blue"
+        >
+          Modal title
+        </ModalHeader>
         <ModalBody>
           <div className="modal__user--body">
-            <div className="row">
+            <div className="user-login">
               <div className="input-container">
                 <label>Email:</label>
-                <input type="text" />
+                <input
+                  type="email"
+                  onChange={(e) => this.handleOnchangeInput(e, "email")}
+                  value={this.state.email}
+                />
               </div>
-            </div>
-            <div className="row">
+
               <div className="input-container">
                 <label>Password:</label>
-                <input type="text" />
+                <input
+                  type="password"
+                  onChange={(e) => this.handleOnchangeInput(e, "password")}
+                  value={this.state.password}
+                />
               </div>
             </div>
-            <div className="row">
+            <div className="user-login">
               <div className="input-container">
-                <label>firstname:</label>
-                <input type="text" />
+                <label>firstName:</label>
+                <input
+                  type="text"
+                  onChange={(e) => this.handleOnchangeInput(e, "firstName")}
+                  value={this.state.firstName}
+                />
               </div>
-            </div>
-            <div className="row">
+
               <div className="input-container">
-                <label>Lastname:</label>
-                <input type="text" />
+                <label>lastName:</label>
+                <input
+                  type="text"
+                  onChange={(e) => this.handleOnchangeInput(e, "lastName")}
+                  value={this.state.lastName}
+                />
               </div>
             </div>
             <div className="row">
               <div className="input-container">
                 <label>Address:</label>
-                <input type="text" />
+                <input
+                  type="text"
+                  onChange={(e) => this.handleOnchangeInput(e, "address")}
+                  value={this.state.address}
+                />
               </div>
             </div>
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={this.toggle}>
-            Do Something
+          <Button
+            color="primary"
+            className="px-3"
+            onClick={(e) => {
+              e.preventDefault()
+              this.handleAddUser()
+            }}
+          >
+            Add
           </Button>{" "}
-          <Button onClick={this.toggle}>Cancel</Button>
+          <Button
+            onClick={() => {
+              this.toggle()
+            }}
+            className="px-3"
+          >
+            Close
+          </Button>
         </ModalFooter>
       </Modal>
     )
